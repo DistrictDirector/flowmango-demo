@@ -191,14 +191,18 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // W key: Start walking - companion animation
+        // W key: Start walking - companion animation (only if visible)
         canvas.add_event(
             GameEvent::KeyPress {
                 key: Key::Character("w".to_string().into()),
-                action: Action::SetAnimation {
-                    target: Target::ById("companion".to_string()),
-                    animation_bytes: include_bytes!("../assets/walking.gif"),
-                    fps: 16.0,
+                action: Action::Conditional {
+                    condition: Condition::IsVisible(Target::ById("companion".to_string())),
+                    if_true: Box::new(Action::SetAnimation {
+                        target: Target::ById("companion".to_string()),
+                        animation_bytes: include_bytes!("../assets/walking.gif"),
+                        fps: 16.0,
+                    }),
+                    if_false: None,
                 },
                 target: Target::ById("companion".to_string())
             },
@@ -232,14 +236,18 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // W key release: Return to idle - companion
+        // W key release: Return to idle - companion (only if visible)
         canvas.add_event(
             GameEvent::KeyRelease {
                 key: Key::Character("w".to_string().into()),
-                action: Action::SetAnimation {
-                    target: Target::ById("companion".to_string()),
-                    animation_bytes: include_bytes!("../assets/idle.gif"),
-                    fps: 8.0,
+                action: Action::Conditional {
+                    condition: Condition::IsVisible(Target::ById("companion".to_string())),
+                    if_true: Box::new(Action::SetAnimation {
+                        target: Target::ById("companion".to_string()),
+                        animation_bytes: include_bytes!("../assets/idle.gif"),
+                        fps: 8.0,
+                    }),
+                    if_false: None,
                 },
                 target: Target::ById("companion".to_string())
             },
@@ -277,12 +285,15 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // R key: Start running - companion (only if indicator is visible)
+        // R key: Start running - companion (only if both indicator AND companion are visible)
         canvas.add_event(
             GameEvent::KeyPress {
                 key: Key::Character("r".to_string().into()),
                 action: Action::Conditional {
-                    condition: Condition::IsVisible(Target::ById("run_indicator".to_string())),
+                    condition: Condition::And(
+                        Box::new(Condition::IsVisible(Target::ById("run_indicator".to_string()))),
+                        Box::new(Condition::IsVisible(Target::ById("companion".to_string())))
+                    ),
                     if_true: Box::new(Action::SetAnimation {
                         target: Target::ById("companion".to_string()),
                         animation_bytes: include_bytes!("../assets/running.gif"),
@@ -326,14 +337,18 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // R key release: Return to idle - companion
+        // R key release: Return to idle - companion (only if visible)
         canvas.add_event(
             GameEvent::KeyRelease {
                 key: Key::Character("r".to_string().into()),
-                action: Action::SetAnimation {
-                    target: Target::ById("companion".to_string()),
-                    animation_bytes: include_bytes!("../assets/idle.gif"),
-                    fps: 8.0,
+                action: Action::Conditional {
+                    condition: Condition::IsVisible(Target::ById("companion".to_string())),
+                    if_true: Box::new(Action::SetAnimation {
+                        target: Target::ById("companion".to_string()),
+                        animation_bytes: include_bytes!("../assets/idle.gif"),
+                        fps: 8.0,
+                    }),
+                    if_false: None,
                 },
                 target: Target::ById("companion".to_string())
             },
@@ -367,14 +382,18 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // A key: Jump - companion animation
+        // A key: Jump - companion animation (only if visible)
         canvas.add_event(
             GameEvent::KeyPress {
                 key: Key::Character("a".to_string().into()),
-                action: Action::SetAnimation {
-                    target: Target::ById("companion".to_string()),
-                    animation_bytes: include_bytes!("../assets/jumping.gif"),
-                    fps: 10.0,
+                action: Action::Conditional {
+                    condition: Condition::IsVisible(Target::ById("companion".to_string())),
+                    if_true: Box::new(Action::SetAnimation {
+                        target: Target::ById("companion".to_string()),
+                        animation_bytes: include_bytes!("../assets/jumping.gif"),
+                        fps: 10.0,
+                    }),
+                    if_false: None,
                 },
                 target: Target::ById("companion".to_string())
             },
@@ -394,13 +413,17 @@ impl MyApp {
             Target::ById("player".to_string())
         );
 
-        // A key: Apply upward momentum - companion
+        // A key: Apply upward momentum - companion (only if visible)
         canvas.add_event(
             GameEvent::KeyPress {
                 key: Key::Character("a".to_string().into()),
-                action: Action::ApplyMomentum {
-                    target: Target::ById("companion".to_string()),
-                    value: (0.0, -30.0)
+                action: Action::Conditional {
+                    condition: Condition::IsVisible(Target::ById("companion".to_string())),
+                    if_true: Box::new(Action::ApplyMomentum {
+                        target: Target::ById("companion".to_string()),
+                        value: (0.0, -30.0)
+                    }),
+                    if_false: None,
                 },
                 target: Target::ById("companion".to_string())
             },
@@ -429,6 +452,9 @@ impl MyApp {
                 
                 if let Some(companion) = canvas.get_game_object_mut("companion") {
                     companion.visible = !companion.visible;
+                    
+                    // Reset momentum when toggling visibility to prevent buildup
+                    companion.momentum = (0.0, 0.0);
                 }
             }
         });
