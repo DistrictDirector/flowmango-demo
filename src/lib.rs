@@ -1,4 +1,4 @@
-use flowmango::{Key, Context, Image, ShapeType, Canvas, GameObject, Action, Target, GameEvent, AnimatedSprite, CanvasMode, Location, Condition, Anchor};
+use quartz::{Key, Context, Image, ShapeType, Canvas, GameObject, Action, Target, GameEvent, AnimatedSprite, CanvasMode, Location, Condition, Anchor};
 use ramp::prism;
 use prism::drawable::Drawable;
 
